@@ -1,0 +1,6 @@
+[book]
+authors = ["Даниил Шипоша"]
+language = "ru"
+multilingual = false
+src = "src"
+title = "Обнаружение столкновений с использованием априорного подхода на примере приложения \"apriori2\""

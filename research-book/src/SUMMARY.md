@@ -1,3 +1,3 @@
 # Summary
 
-- [Amethyst game engine](./amethyst.md)
+- [Chapter 1](./chapter_1.md)

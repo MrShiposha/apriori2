@@ -1,0 +1,6 @@
+[book]
+authors = ["Daniel Shiposha"]
+language = "en"
+multilingual = false
+src = "src"
+title = "apriori 2/research"

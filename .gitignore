@@ -7,3 +7,6 @@ workspace/*/src/**/ffi/gpu/**/*.c
 
 # Book build
 book/book/
+
+# Ignore
+.vscode/

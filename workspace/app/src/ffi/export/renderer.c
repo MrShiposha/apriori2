@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer.h"
+#include "ffi/log.h"
 #include "ffi/export/vulkan_instance.h"
 #include "ffi/result_fns.h"
 
@@ -21,15 +22,15 @@
         void *user_data
     ) {
         if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-            printf("[VULKAN ERROR] %s: %s, code = %d\n", layer_prefix, message, message_code);
+            error("VULKAN ERROR", "%s: %s, code = %d\n", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
-            printf("[VULKAN WARNING] %s: %s, code = %d\n", layer_prefix, message, message_code);
+            warn("VULKAN WARNING", "%s: %s, code = %d\n", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
-            printf("[VULKAN INFO] %s: %s, code = %d\n", layer_prefix, message, message_code);
+            info("VULKAN INFO", "%s: %s, code = %d\n", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-            printf("[VULKAN PERF WARNING] %s: %s, code = %d\n", layer_prefix, message, message_code);
+            warn("VULKAN PERF WARNING", "%s: %s, code = %d\n", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
-            printf("[VULKAN DEBUG] %s: %s, code = %d\n", layer_prefix, message, message_code);
+            debug("VULKAN DEBUG", "%s: %s, code = %d\n", layer_prefix, message, message_code);
         }
 
         // See PFN_vkDebugReportCallbackEXT in Vulkan spec.

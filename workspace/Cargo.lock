@@ -26,6 +26,9 @@ dependencies = [
  "cc",
  "convert_case",
  "infra",
+ "libc",
+ "log",
+ "printf",
  "shaderc",
 ]
 
@@ -155,6 +158,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "gcc"
+version = "0.3.55"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f5f3913fa0bfe7ee1fd8248b6b9f42a5af4b9d65ec2dd2c3c26132b950ecfc2"
+
+[[package]]
 name = "glob"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -255,6 +264,16 @@ name = "peeking_take_while"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
+
+[[package]]
+name = "printf"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15343a566c054c72bdc3f3f138002a87e5320d7389c9713112c9b77e83539141"
+dependencies = [
+ "gcc",
+ "libc",
+]
 
 [[package]]
 name = "proc-macro2"

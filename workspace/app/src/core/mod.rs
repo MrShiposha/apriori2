@@ -1,4 +1,5 @@
 pub mod vulkan_instance;
+pub mod log;
 
 use crate::ffi;
 

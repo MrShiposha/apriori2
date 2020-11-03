@@ -5,6 +5,9 @@ authors = ["Daniel Shiposha <mrshiposha@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+printf = "0.1.0"
+log = "0.4.11"
+libc = "0.2.80"
 
 [build-dependencies]
 infra = { path = "../infra" }

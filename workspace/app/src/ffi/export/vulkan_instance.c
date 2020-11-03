@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
+#include "ffi/log.h"
+
 #include "vulkan_instance.h"
 #include "ffi/app_info.h"
 #include "ffi/result_fns.h"

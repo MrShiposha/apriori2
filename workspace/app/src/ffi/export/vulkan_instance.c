@@ -104,7 +104,7 @@ Result check_all_extensions_available(const char **extensions, uint32_t num_exte
 
         // Some extensions was not found
         if (j == property_count) {
-            err = LAYERS_NOT_FOUND;
+            err = EXTENSIONS_NOT_FOUND;
             error("Vulkan Instance", "Layer \"%s\" is not found", extensions[i]);
         }
     }

@@ -13,6 +13,43 @@
 #include "ffi/util.h"
 #include "ffi/def.h"
 
+#ifdef ___debug___
+#   include "ffi/vk_debug_reporter.h"
+
+    VKAPI_ATTR VkBool32 VKAPI_CALL debug_report(
+        VkDebugReportFlagsEXT flags,
+        VkDebugReportObjectTypeEXT object_type,
+        uint64_t source_object,
+        size_t location,
+        int32_t message_code,
+        const char *layer_prefix,
+        const char *message,
+        void *user_data
+    ) {
+        UNUSED_VAR(object_type);
+        UNUSED_VAR(source_object);
+        UNUSED_VAR(location);
+        UNUSED_VAR(user_data);
+
+        if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+            error("VULKAN ERROR", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+        } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
+            warn("VULKAN WARNING", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+        } else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
+            info("VULKAN INFO", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+        } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
+            warn("VULKAN PERF WARNING", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+        } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+            debug("VULKAN DEBUG", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+        }
+
+        // See PFN_vkDebugReportCallbackEXT in Vulkan spec.
+        // Quote: The application should always return VK_FALSE.
+        //        The VK_TRUE value is reserved for use in layer development.
+        return VK_FALSE;
+    }
+#endif // ___debug___
+
 #ifdef ___windows___
 #   define VULKAN_PLATFORM_EXTENSION MACRO_EXPAND(VK_KHR_WIN32_SURFACE_EXTENSION_NAME)
 #elif ___macos___
@@ -25,6 +62,10 @@
 
 struct VulkanInstanceFFI {
     VkInstance vk_handle;
+
+#ifdef ___debug___
+    DebugReporter *dbg_reporter;
+#endif // ___debug___
 };
 
 Result check_all_layers_available(const char **layers, uint32_t num_layers) {
@@ -105,7 +146,7 @@ Result check_all_extensions_available(const char **extensions, uint32_t num_exte
         // Some extensions was not found
         if (j == property_count) {
             err = EXTENSIONS_NOT_FOUND;
-            error("Vulkan Instance", "Layer \"%s\" is not found", extensions[i]);
+            error("Vulkan Instance", "Extension \"%s\" is not found", extensions[i]);
         }
     }
 
@@ -115,7 +156,9 @@ exit:
 }
 
 Result new_vk_instance() {
-    VulkanInstance instance = malloc(sizeof(VulkanInstance));
+    Result result = { 0 };
+
+    VulkanInstance instance = calloc(1, sizeof(VulkanInstance));
     if (instance == NULL)
         return apriori2_error(OUT_OF_MEMORY);
 
@@ -145,7 +188,7 @@ Result new_vk_instance() {
 #   endif // ___debug___
     };
 
-    Result result = check_all_layers_available(
+    result = check_all_layers_available(
         layer_names,
         layer_names_count
     );
@@ -168,12 +211,28 @@ Result new_vk_instance() {
     instance_ci.ppEnabledLayerNames = layer_names;
     instance_ci.ppEnabledExtensionNames = extension_names;
 
-    VkResult err = vkCreateInstance(&instance_ci, NULL, &instance->vk_handle);
+    result.error.tag = Vulkan;
+    result.error.code = vkCreateInstance(&instance_ci, NULL, &instance->vk_handle);
+    if(result.error.code != VK_SUCCESS)
+        goto failure;
+    result.object = instance;
 
-    return new_vk_result(instance, err);
+#   ifdef ___debug___
+    result = new_debug_reporter(
+        instance,
+        debug_report
+    );
+
+    RESULT_UNWRAP(instance->dbg_reporter, result);
+#   endif // ___debug___
+
+    return result;
 
 failure:
-    free(instance);
+    if (result.object != NULL)
+        drop_vk_instance(result.object);
+    else
+        free(instance);
 
     error(
         "Vulkan Instance",
@@ -193,6 +252,10 @@ Handle vk_handle(VulkanInstance instance) {
 void drop_vk_instance(VulkanInstance instance) {
     if (instance == NULL)
         return;
+
+#   ifdef ___debug___
+    drop_debug_reporter(instance->dbg_reporter);
+#   endif // ___debug___
 
     vkDestroyInstance(instance->vk_handle, NULL);
     free(instance);

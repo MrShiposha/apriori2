@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 
 #include "renderer.h"
+#include "ffi/def.h"
 #include "ffi/log.h"
 #include "ffi/export/vulkan_instance.h"
 #include "ffi/result_fns.h"
@@ -12,15 +13,20 @@
 #   include "ffi/vk_debug_reporter.h"
 
     VKAPI_ATTR VkBool32 VKAPI_CALL debug_report(
-        VkFlags flags,
+        VkDebugReportFlagsEXT flags,
         VkDebugReportObjectTypeEXT object_type,
         uint64_t source_object,
         size_t location,
-        uint32_t message_code,
+        int32_t message_code,
         const char *layer_prefix,
         const char *message,
         void *user_data
     ) {
+        UNUSED_VAR(object_type);
+        UNUSED_VAR(source_object);
+        UNUSED_VAR(location);
+        UNUSED_VAR(user_data);
+
         if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
             error("VULKAN ERROR", "%s: %s, code = %d\n", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
@@ -41,14 +47,14 @@
 #endif // ___debug___
 
 struct RendererFFI {
-    Handle vk_instance;
+    VulkanInstance vk_instance;
 
 #ifdef ___debug___
     DebugReporter *dbg_reporter;
 #endif // ___debug___
 };
 
-Result new_renderer(Handle vulkan_instance) {
+Result new_renderer(VulkanInstance vulkan_instance) {
     Renderer renderer = malloc(sizeof(struct RendererFFI));
     if (renderer == NULL)
         return apriori2_error(OUT_OF_MEMORY);

@@ -8,7 +8,9 @@ typedef int32_t ErrorCode;
 typedef enum Apriori2Error {
     SUCCESS = 0,
     OUT_OF_MEMORY,
-    DEBUG_REPORTER_CREATION
+    DEBUG_REPORTER_CREATION,
+    LAYERS_NOT_FOUND,
+    EXTENSIONS_NOT_FOUND
 } Apriori2Error;
 
 typedef enum ErrorTag {

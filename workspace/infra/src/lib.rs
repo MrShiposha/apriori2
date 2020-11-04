@@ -58,7 +58,8 @@ pub fn project_build(
     shader::process_shader_srcs(&src_path, &src_path)?;
 
     let mut cc_build = cc::Build::new();
-    cc_build.includes(include_dirs.clone());
+    cc_build.includes(include_dirs.clone())
+        .warnings_into_errors(true);
 
     if cfg!(target_os = "windows") {
         cc_build.define("___windows___", None)

@@ -6,12 +6,17 @@
 #![allow(dead_code)]
 #![allow(non_upper_case_globals)]
 
+pub const _VCRT_COMPILER_PREPROCESSOR: u32 = 1;
 pub const _SAL_VERSION: u32 = 20;
 pub const __SAL_H_VERSION: u32 = 180000000;
 pub const _USE_DECLSPECS_FOR_SAL: u32 = 0;
 pub const _USE_ATTRIBUTES_FOR_SAL: u32 = 0;
 pub const _CRT_PACKING: u32 = 8;
 pub const _HAS_EXCEPTIONS: u32 = 1;
+pub const _STL_LANG: u32 = 0;
+pub const _HAS_CXX17: u32 = 0;
+pub const _HAS_CXX20: u32 = 0;
+pub const _HAS_NODISCARD: u32 = 0;
 pub const WCHAR_MIN: u32 = 0;
 pub const WCHAR_MAX: u32 = 65535;
 pub const WINT_MIN: u32 = 0;
@@ -57,6 +62,8 @@ pub type ErrorCode = i32;
 pub const Apriori2Error_SUCCESS: Apriori2Error = 0;
 pub const Apriori2Error_OUT_OF_MEMORY: Apriori2Error = 1;
 pub const Apriori2Error_DEBUG_REPORTER_CREATION: Apriori2Error = 2;
+pub const Apriori2Error_LAYERS_NOT_FOUND: Apriori2Error = 3;
+pub const Apriori2Error_EXTENSIONS_NOT_FOUND: Apriori2Error = 4;
 pub type Apriori2Error = ::std::os::raw::c_int;
 pub const ErrorTag_Apriori2: ErrorTag = 0;
 pub const ErrorTag_Vulkan: ErrorTag = 1;

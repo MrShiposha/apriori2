@@ -5,4 +5,6 @@ typedef void *Handle;
 
 #define MACRO_EXPAND(...) __VA_ARGS__
 
+#define UNUSED_VAR(x) (void)(x)
+
 #endif // ___APRIORI2_DEF_H___

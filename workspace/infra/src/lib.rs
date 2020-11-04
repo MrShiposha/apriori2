@@ -20,7 +20,7 @@ impl fmt::Display for Error {
         match self {
             Self::Io(err) => write!(f, "io error: {}", err),
             Self::FilenameExpected(path) => write!(f, "{}: file name expected", path.display()),
-            Self::ParentDirExpected(path) => write!(f, "{}: parent directiry expected", path.display()),
+            Self::ParentDirExpected(path) => write!(f, "{}: parent directory expected", path.display()),
             Self::Bindgen => write!(f, "c bindings generation error"),
             Self::ShaderFile(err) => write!(f, "shader error: {}", err),
             Self::ShaderCompile(err) => write!(f, "shader compiler error: {}", err),

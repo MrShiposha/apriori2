@@ -3,24 +3,16 @@
 
 #include <stdint.h>
 
-typedef int32_t ErrorCode;
+#include <vulkan/vulkan.h>
+
+#define APRIORI2_ERROR_NUM (1000)
 
 typedef enum Apriori2Error {
-    SUCCESS = 0,
-    OUT_OF_MEMORY,
+    SUCCESS = VK_SUCCESS,
+    OUT_OF_MEMORY = -APRIORI2_ERROR_NUM, // TODO: description (See Vulkan spec VkResult)
     DEBUG_REPORTER_CREATION,
     LAYERS_NOT_FOUND,
     EXTENSIONS_NOT_FOUND
 } Apriori2Error;
-
-typedef enum ErrorTag {
-    Apriori2,
-    Vulkan
-} ErrorTag;
-
-typedef struct ErrorDescriptor {
-    ErrorTag tag;
-    ErrorCode code;
-} ErrorDescriptor;
 
 #endif // ___APRIORI2_ERROR_H___

@@ -7,23 +7,12 @@ pub use vulkan_instance::VulkanInstance;
 
 #[derive(Debug)]
 pub enum Error {
-    Apriori2FFI(ffi::ErrorCode),
-    VulkanFFI(ffi::ErrorCode)
+    Apriori2FFI(ffi::Apriori2Error)
 }
 
-impl ffi::ErrorDescriptor {
-    pub fn is_success(&self) -> bool {
-        self.code == ffi::Apriori2Error_SUCCESS
-    }
-}
-
-impl From<ffi::ErrorDescriptor> for Error {
-    fn from(err: ffi::ErrorDescriptor) -> Self {
-        match err.tag {
-            ffi::ErrorTag_Apriori2 => Self::Apriori2FFI(err.code),
-            ffi::ErrorTag_Vulkan => Self::VulkanFFI(err.code),
-            _ => unreachable!("unknown error tag"),
-        }
+impl From<ffi::Apriori2Error> for Error {
+    fn from(err: ffi::Apriori2Error) -> Self {
+        Self::Apriori2FFI(err)
     }
 }
 
@@ -33,7 +22,7 @@ impl ffi::Result {
     pub fn try_unwrap<T>(&self) -> Result<*mut T> {
         let result;
         unsafe {
-            if self.error.is_success() {
+            if self.error == ffi::Apriori2Error_SUCCESS {
                 result = std::mem::transmute::<ffi::Handle, *mut T>(self.object);
             } else {
                 return Err(self.error.into())

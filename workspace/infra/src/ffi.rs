@@ -8,6 +8,7 @@ use {
 
 pub const FOREIGN_FN_IFACE_DIR_NAME: &'static str = "ffi";
 const RUST_VISIBLE_DIR: &'static str = "export";
+const VULKAN_ITEM_REGEX: &'static str = r"(PFN_)?((vk)|(Vk)|(VK)).*";
 
 pub fn process_c_srcs(dir: &Path, include_dirs: &Vec<PathBuf>, cc_build: &mut cc::Build) -> Result<()> {
     for entry in fs::read_dir(dir)? {
@@ -25,6 +26,7 @@ pub fn process_c_srcs(dir: &Path, include_dirs: &Vec<PathBuf>, cc_build: &mut cc
                         include_dirs.iter()
                             .map(|path| format!("-F{}", path.display()))
                     )
+                    .blacklist_item(VULKAN_ITEM_REGEX)
                     .raw_line("#![allow(unused_variables)]")
                     .raw_line("#![allow(non_snake_case)]")
                     .raw_line("#![allow(non_camel_case_types)]")

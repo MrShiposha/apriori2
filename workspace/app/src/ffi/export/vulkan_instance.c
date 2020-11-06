@@ -69,31 +69,26 @@ struct VulkanInstanceFFI {
 };
 
 Result check_all_layers_available(const char **layers, uint32_t num_layers) {
-    ErrorTag tag = Vulkan;
-    ErrorCode err = SUCCESS;
+    Apriori2Error err = SUCCESS;
 
     VkLayerProperties *layer_props = NULL;
 
     uint32_t property_count = 0;
-    tag = Vulkan;
     err = vkEnumerateInstanceLayerProperties(&property_count, NULL);
     if (err != VK_SUCCESS) {
         goto exit;
     }
 
-    tag = Apriori2;
     layer_props = malloc(property_count * sizeof(VkLayerProperties));
     if (layer_props == NULL) {
         err = OUT_OF_MEMORY;
         goto exit;
     }
 
-    tag = Vulkan;
     err = vkEnumerateInstanceLayerProperties(&property_count, layer_props);
     if (err != VK_SUCCESS)
         goto exit;
 
-    tag = Apriori2;
     for (uint32_t i = 0, j = 0; i < num_layers; ++i) {
         for (j = 0; j < property_count; ++j) {
             if (!strcmp(layers[i], layer_props[j].layerName))
@@ -109,34 +104,29 @@ Result check_all_layers_available(const char **layers, uint32_t num_layers) {
 
 exit:
     free(layer_props);
-    return tag_error(tag, err);
+    return apriori2_error(err);
 }
 
 Result check_all_extensions_available(const char **extensions, uint32_t num_extensions) {
-    ErrorTag tag = Vulkan;
-    ErrorCode err = SUCCESS;
+    Apriori2Error err = SUCCESS;
     VkExtensionProperties *extension_props = NULL;
 
     uint32_t property_count = 0;
-    tag = Vulkan;
     err = vkEnumerateInstanceExtensionProperties(NULL, &property_count, NULL);
     if (err != VK_SUCCESS) {
         goto exit;
     }
 
-    tag = Apriori2;
     extension_props = malloc(property_count * sizeof(VkLayerProperties));
     if (extension_props == NULL) {
         err = OUT_OF_MEMORY;
         goto exit;
     }
 
-    tag = Vulkan;
     err = vkEnumerateInstanceExtensionProperties(NULL, &property_count, extension_props);
     if (err != VK_SUCCESS)
         goto exit;
 
-    tag = Apriori2;
     for (uint32_t i = 0, j = 0; i < num_extensions; ++i) {
         for (j = 0; j < property_count; ++j) {
             if (!strcmp(extensions[i], extension_props[j].extensionName))
@@ -152,7 +142,7 @@ Result check_all_extensions_available(const char **extensions, uint32_t num_exte
 
 exit:
     free(extension_props);
-    return tag_error(tag, err);
+    return apriori2_error(err);
 }
 
 Result new_vk_instance() {
@@ -192,14 +182,14 @@ Result new_vk_instance() {
         layer_names,
         layer_names_count
     );
-    if (result.error.code != SUCCESS)
+    if (result.error != SUCCESS)
         goto failure;
 
     result = check_all_extensions_available(
         extension_names,
         STATIC_ARRAY_SIZE(extension_names)
     );
-    if (result.error.code != SUCCESS)
+    if (result.error != SUCCESS)
         goto failure;
 
     VkInstanceCreateInfo instance_ci = {
@@ -211,9 +201,8 @@ Result new_vk_instance() {
     instance_ci.ppEnabledLayerNames = layer_names;
     instance_ci.ppEnabledExtensionNames = extension_names;
 
-    result.error.tag = Vulkan;
-    result.error.code = vkCreateInstance(&instance_ci, NULL, &instance->vk_handle);
-    if(result.error.code != VK_SUCCESS)
+    result.error = vkCreateInstance(&instance_ci, NULL, &instance->vk_handle);
+    if(result.error != VK_SUCCESS)
         goto failure;
     result.object = instance;
 
@@ -237,12 +226,12 @@ failure:
     error(
         "Vulkan Instance",
         "instance creation failed: tag = %d, error = %d",
-        result.error.tag, result.error.code
+        result.error, result.error
     );
     return result;
 }
 
-Handle vk_handle(VulkanInstance instance) {
+VkInstance vk_handle(VulkanInstance instance) {
     if (instance == NULL)
         return NULL;
     else

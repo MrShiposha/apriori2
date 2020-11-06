@@ -4,20 +4,8 @@
 #include "error.h"
 #include "def.h"
 
-// TODO logs
 #define RESULT_UNWRAP(out_object, result) do { \
-    if ( \
-        (result).error.tag == Apriori2 \
-        && (result).error.code != SUCCESS \
-    ) { \
-        (result).object = NULL; \
-        (out_object) = NULL; \
-        goto failure; \
-    } \
-    else if ( \
-        (result).error.tag == Vulkan \
-        && (result).error.code != VK_SUCCESS \
-    ) { \
+    if ((result).error != SUCCESS) { \
         (result).object = NULL; \
         (out_object) = NULL; \
         goto failure; \
@@ -26,7 +14,7 @@
 } while(0)
 
 typedef struct Result {
-    ErrorDescriptor error;
+    Apriori2Error error;
     Handle object;
 } Result;
 

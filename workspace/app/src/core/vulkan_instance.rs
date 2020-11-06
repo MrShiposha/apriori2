@@ -16,3 +16,11 @@ impl VulkanInstance {
         Ok(instance)
     }
 }
+
+impl Drop for VulkanInstance {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::drop_vk_instance(self.instance_ffi);
+        }
+    }
+}

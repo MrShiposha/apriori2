@@ -7,7 +7,7 @@ typedef struct VulkanInstanceFFI *VulkanInstance;
 
 Result new_vk_instance();
 
-Handle vk_handle(VulkanInstance instance);
+VkInstance vk_handle(VulkanInstance instance);
 
 void drop_vk_instance(VulkanInstance instance);
 

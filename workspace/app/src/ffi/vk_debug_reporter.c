@@ -35,7 +35,7 @@ Result new_debug_reporter(VulkanInstance instance, PFN_vkDebugReportCallbackEXT 
         &reporter->callback
     );
 
-    return new_vk_result(reporter, result);
+    return new_result(reporter, result);
 }
 
 void drop_debug_reporter(DebugReporter *debug_reporter) {

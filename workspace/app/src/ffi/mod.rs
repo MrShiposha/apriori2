@@ -21,6 +21,9 @@ pub const WCHAR_MIN: u32 = 0;
 pub const WCHAR_MAX: u32 = 65535;
 pub const WINT_MIN: u32 = 0;
 pub const WINT_MAX: u32 = 65535;
+pub const VULKAN_H_: u32 = 1;
+pub const VULKAN_CORE_H_: u32 = 1;
+pub const APRIORI2_ERROR_NUM: u32 = 1000;
 pub type va_list = *mut ::std::os::raw::c_char;
 extern "C" {
     pub fn __va_start(arg1: *mut *mut ::std::os::raw::c_char, ...);
@@ -58,60 +61,18 @@ pub type uint_fast32_t = ::std::os::raw::c_uint;
 pub type uint_fast64_t = ::std::os::raw::c_ulonglong;
 pub type intmax_t = ::std::os::raw::c_longlong;
 pub type uintmax_t = ::std::os::raw::c_ulonglong;
-pub type ErrorCode = i32;
+pub type max_align_t = f64;
 pub const Apriori2Error_SUCCESS: Apriori2Error = 0;
-pub const Apriori2Error_OUT_OF_MEMORY: Apriori2Error = 1;
-pub const Apriori2Error_DEBUG_REPORTER_CREATION: Apriori2Error = 2;
-pub const Apriori2Error_LAYERS_NOT_FOUND: Apriori2Error = 3;
-pub const Apriori2Error_EXTENSIONS_NOT_FOUND: Apriori2Error = 4;
+pub const Apriori2Error_OUT_OF_MEMORY: Apriori2Error = -1000;
+pub const Apriori2Error_DEBUG_REPORTER_CREATION: Apriori2Error = -999;
+pub const Apriori2Error_LAYERS_NOT_FOUND: Apriori2Error = -998;
+pub const Apriori2Error_EXTENSIONS_NOT_FOUND: Apriori2Error = -997;
 pub type Apriori2Error = ::std::os::raw::c_int;
-pub const ErrorTag_Apriori2: ErrorTag = 0;
-pub const ErrorTag_Vulkan: ErrorTag = 1;
-pub type ErrorTag = ::std::os::raw::c_int;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ErrorDescriptor {
-    pub tag: ErrorTag,
-    pub code: ErrorCode,
-}
-#[test]
-fn bindgen_test_layout_ErrorDescriptor() {
-    assert_eq!(
-        ::std::mem::size_of::<ErrorDescriptor>(),
-        8usize,
-        concat!("Size of: ", stringify!(ErrorDescriptor))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<ErrorDescriptor>(),
-        4usize,
-        concat!("Alignment of ", stringify!(ErrorDescriptor))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<ErrorDescriptor>())).tag as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ErrorDescriptor),
-            "::",
-            stringify!(tag)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<ErrorDescriptor>())).code as *const _ as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ErrorDescriptor),
-            "::",
-            stringify!(code)
-        )
-    );
-}
 pub type Handle = *mut ::std::os::raw::c_void;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Result {
-    pub error: ErrorDescriptor,
+    pub error: Apriori2Error,
     pub object: Handle,
 }
 #[test]
@@ -155,9 +116,6 @@ pub struct VulkanInstanceFFI {
 pub type VulkanInstance = *mut VulkanInstanceFFI;
 extern "C" {
     pub fn new_vk_instance() -> Result;
-}
-extern "C" {
-    pub fn vk_handle(instance: VulkanInstance) -> Handle;
 }
 extern "C" {
     pub fn drop_vk_instance(instance: VulkanInstance);

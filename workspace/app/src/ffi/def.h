@@ -7,4 +7,6 @@ typedef void *Handle;
 
 #define UNUSED_VAR(x) (void)(x)
 
+#define AS(x, ty) ((ty)(x))
+
 #endif // ___APRIORI2_DEF_H___

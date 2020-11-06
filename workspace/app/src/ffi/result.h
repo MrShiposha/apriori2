@@ -13,6 +13,11 @@
     else (out_object) = (result).object; \
 } while(0)
 
+#define EXPECT_SUCCESS(result) do { \
+    if ((result).error != SUCCESS) \
+        goto failure; \
+} while(0)
+
 typedef struct Result {
     Apriori2Error error;
     Handle object;

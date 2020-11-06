@@ -32,15 +32,15 @@
         UNUSED_VAR(user_data);
 
         if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-            error("VULKAN ERROR", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+            error("VULKAN", "%s: %s, code = %d", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
-            warn("VULKAN WARNING", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+            warn("VULKAN", "%s: %s, code = %d", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
-            info("VULKAN INFO", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+            info("VULKAN", "%s: %s, code = %d", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-            warn("VULKAN PERF WARNING", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+            warn("VULKAN", "%s: %s, code = %d", layer_prefix, message, message_code);
         } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
-            debug("VULKAN DEBUG", "%s: %s, code = %d\n", layer_prefix, message, message_code);
+            debug("VULKAN", "%s: %s, code = %d", layer_prefix, message, message_code);
         }
 
         // See PFN_vkDebugReportCallbackEXT in Vulkan spec.
@@ -62,6 +62,8 @@
 
 struct VulkanInstanceFFI {
     VkInstance vk_handle;
+    uint32_t phy_device_count;
+    VkPhysicalDevice *phy_devices;
 
 #ifdef ___debug___
     DebugReporter *dbg_reporter;
@@ -145,10 +147,40 @@ exit:
     return apriori2_error(err);
 }
 
+Result init_phy_devices(VulkanInstance instance) {
+    Result result = { 0 };
+
+    result.error = vkEnumeratePhysicalDevices(
+        instance->vk_handle,
+        &instance->phy_device_count,
+        NULL
+    );
+    if (result.error != VK_SUCCESS)
+        goto exit;
+
+    instance->phy_devices = calloc(
+        instance->phy_device_count,
+        sizeof(VkPhysicalDevice)
+    );
+    if (instance->phy_devices == NULL) {
+        result.error = OUT_OF_MEMORY;
+        goto exit;
+    }
+
+    result.error = vkEnumeratePhysicalDevices(
+        instance->vk_handle,
+        &instance->phy_device_count,
+        instance->phy_devices
+    );
+
+exit:
+    return result;
+}
+
 Result new_vk_instance() {
     Result result = { 0 };
 
-    VulkanInstance instance = calloc(1, sizeof(VulkanInstance));
+    VulkanInstance instance = calloc(1, sizeof(struct VulkanInstanceFFI));
     if (instance == NULL)
         return apriori2_error(OUT_OF_MEMORY);
 
@@ -204,7 +236,10 @@ Result new_vk_instance() {
     result.error = vkCreateInstance(&instance_ci, NULL, &instance->vk_handle);
     if(result.error != VK_SUCCESS)
         goto failure;
-    result.object = instance;
+
+    EXPECT_SUCCESS(
+        init_phy_devices(instance)
+    );
 
 #   ifdef ___debug___
     result = new_debug_reporter(
@@ -215,11 +250,12 @@ Result new_vk_instance() {
     RESULT_UNWRAP(instance->dbg_reporter, result);
 #   endif // ___debug___
 
+    result.object = instance;
     return result;
 
 failure:
-    if (result.object != NULL)
-        drop_vk_instance(result.object);
+    if (instance->vk_handle != NULL)
+        drop_vk_instance(instance);
     else
         free(instance);
 
@@ -245,6 +281,8 @@ void drop_vk_instance(VulkanInstance instance) {
 #   ifdef ___debug___
     drop_debug_reporter(instance->dbg_reporter);
 #   endif // ___debug___
+
+    free(instance->phy_devices);
 
     vkDestroyInstance(instance->vk_handle, NULL);
     free(instance);

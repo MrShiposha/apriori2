@@ -67,6 +67,7 @@ pub const Apriori2Error_OUT_OF_MEMORY: Apriori2Error = -1000;
 pub const Apriori2Error_DEBUG_REPORTER_CREATION: Apriori2Error = -999;
 pub const Apriori2Error_LAYERS_NOT_FOUND: Apriori2Error = -998;
 pub const Apriori2Error_EXTENSIONS_NOT_FOUND: Apriori2Error = -997;
+pub const Apriori2Error_GRAPHICS_QUEUE_FAMILY_NOT_FOUND: Apriori2Error = -996;
 pub type Apriori2Error = ::std::os::raw::c_int;
 pub type Handle = *mut ::std::os::raw::c_void;
 #[repr(C)]

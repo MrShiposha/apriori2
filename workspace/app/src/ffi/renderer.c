@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <vulkan/vulkan.h>
 
 #include "ffi/export/renderer.h"
@@ -76,18 +77,25 @@ Apriori2Error init_renderer_queues(struct RendererQueues *queues, VkPhysicalDevi
         family_props
     );
 
+    bool is_graphics_queue_found = false;
+
     VkQueueFamilyProperties *current = NULL;
     for (uint32_t i = 0; i < queue_family_count; ++i) {
         current = family_props + i;
 
         if (current->queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             queues->graphics_idx = i;
+            is_graphics_queue_found = true;
         }
     }
 
     free(family_props);
 
-    return SUCCESS;
+    if (!is_graphics_queue_found) {
+        return GRAPHICS_QUEUE_FAMILY_NOT_FOUND;
+    } else {
+        return SUCCESS;
+    }
 }
 
 Result new_renderer(VulkanInstance vulkan_instance) {
@@ -103,7 +111,8 @@ Result new_renderer(VulkanInstance vulkan_instance) {
     renderer->vk_instance = vulkan_instance;
 
     VkPhysicalDevice phy_device = select_phy_device(vulkan_instance);
-    init_renderer_queues(&renderer->queues, phy_device);
+    result.error = init_renderer_queues(&renderer->queues, phy_device);
+    EXPECT_SUCCESS(result);
 
     return result;
 

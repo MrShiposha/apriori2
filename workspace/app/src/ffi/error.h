@@ -12,7 +12,8 @@ typedef enum Apriori2Error {
     OUT_OF_MEMORY = -APRIORI2_ERROR_NUM, // TODO: description (See Vulkan spec VkResult)
     DEBUG_REPORTER_CREATION,
     LAYERS_NOT_FOUND,
-    EXTENSIONS_NOT_FOUND
+    EXTENSIONS_NOT_FOUND,
+    GRAPHICS_QUEUE_FAMILY_NOT_FOUND
 } Apriori2Error;
 
 #endif // ___APRIORI2_ERROR_H___

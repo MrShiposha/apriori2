@@ -6,6 +6,7 @@
 
 #include "ffi/log.h"
 
+#include "ffi/export/vulkan_instance.h"
 #include "vulkan_instance.h"
 #include "ffi/app_info.h"
 #include "ffi/result_fns.h"
@@ -14,8 +15,6 @@
 #include "ffi/def.h"
 
 #ifdef ___debug___
-#   include "ffi/vk_debug_reporter.h"
-
     VKAPI_ATTR VkBool32 VKAPI_CALL debug_report(
         VkDebugReportFlagsEXT flags,
         VkDebugReportObjectTypeEXT object_type,
@@ -59,16 +58,6 @@
 #elif ___unknown___
 #   error "this target OS is not supported yet"
 #endif // os
-
-struct VulkanInstanceFFI {
-    VkInstance vk_handle;
-    uint32_t phy_device_count;
-    VkPhysicalDevice *phy_devices;
-
-#ifdef ___debug___
-    DebugReporter *dbg_reporter;
-#endif // ___debug___
-};
 
 Result check_all_layers_available(const char **layers, uint32_t num_layers) {
     Apriori2Error err = SUCCESS;
@@ -261,8 +250,8 @@ failure:
 
     error(
         "Vulkan Instance",
-        "instance creation failed: tag = %d, error = %d",
-        result.error, result.error
+        "instance creation failed: error = %d",
+        result.error
     );
     return result;
 }

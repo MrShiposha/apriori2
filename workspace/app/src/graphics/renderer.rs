@@ -1,6 +1,8 @@
 use crate::{
     ffi,
-    core::{Result, VulkanInstance}
+    os::{self, WindowMethods},
+    core::{Result, VulkanInstance},
+    io,
 };
 
 pub struct Renderer {
@@ -8,12 +10,16 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub fn new(vk_instance: &VulkanInstance) -> Result<Self> {
+    pub fn new<Id: io::InputId>(
+        vk_instance: &VulkanInstance,
+        window: &os::Window<Id>,
+    ) -> Result<Self> {
         let renderer;
         unsafe {
             renderer = Self {
                 renderer_ffi: ffi::new_renderer(
-                    vk_instance.instance_ffi
+                    vk_instance.instance_ffi,
+                    window.platform_handle()
                 ).try_unwrap()?
             }
         }

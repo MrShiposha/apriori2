@@ -12,6 +12,7 @@
 #include "ffi/error.h"
 #include "ffi/export/vulkan_instance.h"
 #include "ffi/result_fns.h"
+#include "ffi/os/surface.h"
 
 uint32_t rate_phy_device_suitability(VkPhysicalDevice device) {
     uint32_t score = 0;
@@ -57,7 +58,13 @@ VkPhysicalDevice select_phy_device(VulkanInstance instance) {
     return winner_device;
 }
 
-Apriori2Error init_renderer_queues(struct RendererQueues *queues, VkPhysicalDevice device) {
+Apriori2Error init_renderer_queues(
+    struct RendererQueues *queues,
+    VkPhysicalDevice device,
+    VkSurfaceKHR surface
+) {
+    Apriori2Error error = SUCCESS;
+
     uint32_t queue_family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(
         device,
@@ -78,27 +85,65 @@ Apriori2Error init_renderer_queues(struct RendererQueues *queues, VkPhysicalDevi
     );
 
     bool is_graphics_queue_found = false;
+    bool is_present_queue_found = false;
+
+    VkBool32 is_present_support = false;
 
     VkQueueFamilyProperties *current = NULL;
     for (uint32_t i = 0; i < queue_family_count; ++i) {
         current = family_props + i;
 
+        error = vkGetPhysicalDeviceSurfaceSupportKHR(
+            device,
+            i,
+            surface,
+            &is_present_support
+        );
+
+        if (error != VK_SUCCESS)
+            return error;
+
+        if (
+            (current->queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            && is_present_support
+        ) {
+            queues->graphics_idx = i;
+            queues->present_idx = i;
+
+            is_graphics_queue_found = true;
+            is_present_queue_found = true;
+            break;
+        }
+
         if (current->queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             queues->graphics_idx = i;
             is_graphics_queue_found = true;
+        }
+
+        if (is_present_support) {
+            queues->present_idx = i;
+            is_present_queue_found = true;
         }
     }
 
     free(family_props);
 
-    if (!is_graphics_queue_found) {
-        return GRAPHICS_QUEUE_FAMILY_NOT_FOUND;
-    } else {
-        return SUCCESS;
-    }
+    if (!is_graphics_queue_found && !is_present_queue_found)
+        error = RENDERER_QUEUE_FAMILIES_NOT_FOUND;
+    else if (!is_graphics_queue_found)
+        error = GRAPHICS_QUEUE_FAMILY_NOT_FOUND;
+    else if (!is_present_queue_found)
+        error = PRESENT_QUEUE_FAMILY_NOT_FOUND;
+    else
+        error = SUCCESS;
+
+    return error;
 }
 
-Result new_renderer(VulkanInstance vulkan_instance) {
+Result new_renderer(
+    VulkanInstance vulkan_instance,
+    Handle window_platform_handle
+) {
     Result result = { 0 };
 
     result.object = calloc(1, sizeof(struct RendererFFI));
@@ -111,7 +156,17 @@ Result new_renderer(VulkanInstance vulkan_instance) {
     renderer->vk_instance = vulkan_instance;
 
     VkPhysicalDevice phy_device = select_phy_device(vulkan_instance);
-    result.error = init_renderer_queues(&renderer->queues, phy_device);
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
+    RESULT_UNWRAP(
+        surface,
+        new_surface(vulkan_instance->vk_handle, window_platform_handle)
+    );
+
+    result.error = init_renderer_queues(
+        &renderer->queues,
+        phy_device,
+        surface
+    );
     EXPECT_SUCCESS(result);
 
     return result;

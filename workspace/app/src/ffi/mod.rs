@@ -68,6 +68,8 @@ pub const Apriori2Error_DEBUG_REPORTER_CREATION: Apriori2Error = -999;
 pub const Apriori2Error_LAYERS_NOT_FOUND: Apriori2Error = -998;
 pub const Apriori2Error_EXTENSIONS_NOT_FOUND: Apriori2Error = -997;
 pub const Apriori2Error_GRAPHICS_QUEUE_FAMILY_NOT_FOUND: Apriori2Error = -996;
+pub const Apriori2Error_PRESENT_QUEUE_FAMILY_NOT_FOUND: Apriori2Error = -995;
+pub const Apriori2Error_RENDERER_QUEUE_FAMILIES_NOT_FOUND: Apriori2Error = -994;
 pub type Apriori2Error = ::std::os::raw::c_int;
 pub type Handle = *mut ::std::os::raw::c_void;
 #[repr(C)]
@@ -128,7 +130,7 @@ pub struct RendererFFI {
 }
 pub type Renderer = *mut RendererFFI;
 extern "C" {
-    pub fn new_renderer(vulkan_instance: VulkanInstance) -> Result;
+    pub fn new_renderer(vulkan_instance: VulkanInstance, window_platform_handle: Handle) -> Result;
 }
 extern "C" {
     pub fn drop_renderer(renderer: Renderer);
